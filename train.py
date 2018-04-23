@@ -1,7 +1,7 @@
 # Tensorflow Imports
 import tensorflow as tf
 import numpy as np
-tf.logging.set_verbosity(tf.logging.INFO)
+tf.logging.set_verbosity(tf.logging.DEBUG)
 
 # Sound file stuff
 import numpy as np
@@ -57,7 +57,8 @@ NUM_LANGUAGES = 3# This is a default that should get reset
 # Input Layer
 # we do something custom here
 def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
-    input_layer = tf.reshape(features["x"], [-1, IMAGE_WIDTH, IMAGE_HEIGHT, 1])
+    input_layer = tf.reshape(features["x"], [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
+    print("Input Layer Shape: ", input_layer.shape)
 
     # Convolutional/Pooling layer 1
     conv1 = tf.layers.conv2d(
@@ -67,6 +68,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         padding="same",
         activation=tf.nn.relu
     )
+    print("Conv 1 Layer Shape: ", conv1.shape)
     pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
 
     # Convolutional and Pooling Layer 2
@@ -78,11 +80,15 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         activation=tf.nn.relu
     )
     pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+    print("Pool 2 Shape: ", pool2.shape)
 
     # Fully Connected Layer
-    pool2_flat = tf.reshape(pool2, [-1, 5 * 5 * 64]) # 7x7 = image dimensions
+    pool2_flat = tf.reshape(pool2, [-1, 3 * 75 * 64]) # 7x7 = image dimensions
+    print("Pool 2 Flat Shape: ", pool2_flat.shape)
     dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
-    # dropout = tf.layers.dropout(inputs=dense, training=mode == tf.estimator.ModeKeys.TRAIN)
+    print("Dense Shape: ", dense.shape)
+    dropout = tf.layers.dropout(inputs=dense, training=mode == tf.estimator.ModeKeys.TRAIN)
+    print("Dropout: ", dropout.shape)
 
     # Logits Layer
     logits = tf.layers.dense(inputs=dropout, units=NUM_LANGUAGES)
@@ -96,7 +102,9 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Loss Function
-    loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
+    print("labels ", labels.shape, " logits ", logits.shape)
+    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
+    print("Loss Shape: ", loss.shape)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
