@@ -12,6 +12,7 @@ import random
 
 # Manage our files
 import voxforge
+import os
 
 # Verbosity flag
 import argparse
@@ -29,6 +30,11 @@ def create_mfcc(filename: str) -> np.ndarray:
 # # # IMAGE SETTINGS
 IMAGE_WIDTH = 13
 IMAGE_HEIGHT = 300
+
+
+def image_is_big_enough(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT) -> bool:
+    return img.shape[0] >= height and img.shape[1] >= width
+
 
 def randomCrop(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT) -> np.ndarray:
     assert img.shape[0] >= height
@@ -159,18 +165,38 @@ def main(unused_argv):
     NUM_LANGUAGES = len(languages)
 
     tf.logging.debug("Creating images...")
-    data = np.array([randomCrop(create_mfcc(filename)) for filename, language in file_list]).astype(np.float32)
+    images = []
+    raw_labels = []
+    for filename, language in file_list:
+        try:
+            image = create_mfcc(filename)
+        except ValueError as e:
+            tf.logging.warn("An audio file is messed up: %s", filename)
+        if image_is_big_enough(image):
+            cropped = randomCrop(image)
+            images.append(cropped)
+            raw_labels.append(language)
+        else:
+            tf.logging.info("Small image: size is {image_shape}, min size is {height}x{width}".format(image_shape=image.shape,
+                                                                                                      width=IMAGE_WIDTH,
+                                                                                                      height=IMAGE_HEIGHT))
+    data = np.array(images).astype(np.float32)
     tf.logging.debug("Data Shape: %s", data.shape)
-    labels = np.array([np.where(languages == language) for filename, language in file_list]).flatten()
+
+    labels = np.array([np.where(languages == language) for language in raw_labels]).flatten()
     tf.logging.debug("Labels Shape: %s", labels.shape)
+
+    #data = np.array([randomCrop(create_mfcc(filename)) for filename, language in file_list]).astype(np.float32)
+
+    #labels = np.array([np.where(languages == language) for filename, language in file_list]).flatten()
     train_data, eval_data, train_labels, eval_labels = train_test_split(data, labels, test_size=0.10, random_state=42)
     tf.logging.debug("Split Training/Testing data.")
 
-    # tf.logging.debug("processing NCF data")
-    # ncf_languages = ["english", "german", "italian"]
-    # ncf_files = [os.path.join("test-audio", "{0}.wav".format(language)) for language in ncf_languages]
-    # ncf_data = np.array([randomCrop(create_mfcc(filename)) for filename in ncf_files]).astype(np.float32)
-    # ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
+    tf.logging.debug("processing NCF data")
+    ncf_languages = ["english", "german", "italian"]
+    ncf_files = [os.path.join("test-audio", "{0}.wav".format(language)) for language in ncf_languages]
+    ncf_data = np.array([randomCrop(create_mfcc(filename)) for filename in ncf_files]).astype(np.float32)
+    ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
 
     # Create the Estimator
     mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir="/tmp/lingua-franca-model")
@@ -187,7 +213,7 @@ def main(unused_argv):
         shuffle=True
     )
 
-    mnist_classifier.train(input_fn=train_input_fn, steps=20000, hooks=[logging_hook])
+    train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn, max_steps=20000, hooks=[logging_hook])
 
     eval_input_fn = tf.estimator.inputs.numpy_input_fn(
         x={"x": eval_data},
@@ -196,19 +222,23 @@ def main(unused_argv):
         shuffle=False
     )
 
+    eval_spec = tf.estimator.EvalSpec(input_fn=eval_input_fn)
+
+    tf.estimator.train_and_evaluate(mnist_classifier, train_spec, eval_spec)
+
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
-    print(eval_results)
+    print("Eval Results: %s" % eval_results)
 
-    # tf.logging.debug("Evaluating our data")
-    # eval_ncf_audio_fn = tf.estimator.inputs.numpy_input_fn(
-    #     x={"x": ncf_data},
-    #     y=ncf_labels,
-    #     num_epochs=1,
-    #     shuffle=False
-    # )
+    tf.logging.debug("Evaluating our data")
+    eval_ncf_audio_fn = tf.estimator.inputs.numpy_input_fn(
+        x={"x": ncf_data},
+        y=ncf_labels,
+        num_epochs=1,
+        shuffle=False
+    )
 
-    # ncf_results = mnist_classifier.evaluate(input_fn=eval_ncf_audio_fn)
-    # print(ncf_results)
+    ncf_results = mnist_classifier.evaluate(input_fn=eval_ncf_audio_fn)
+    print("NCF Results: %s" % ncf_results)
 
 
 
