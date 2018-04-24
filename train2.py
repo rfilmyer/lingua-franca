@@ -177,9 +177,9 @@ def main(unused_argv):
             images.append(cropped)
             raw_labels.append(language)
         else:
-            tf.logging.info("Small image: size is {image_shape}, min size is {height}x{width}".format(image_shape=image.shape,
-                                                                                                      width=IMAGE_WIDTH,
-                                                                                                      height=IMAGE_HEIGHT))
+            tf.logging.debug("Small image: size is {image_shape}, min size is {height}x{width}".format(image_shape=image.shape,
+                                                                                                       width=IMAGE_WIDTH,
+                                                                                                       height=IMAGE_HEIGHT))
     data = np.array(images).astype(np.float32)
     tf.logging.debug("Data Shape: %s", data.shape)
 
@@ -250,4 +250,5 @@ if __name__ == "__main__":
     if args.v:
         tf.logging.set_verbosity(tf.logging.DEBUG)
 
-    tf.app.run()
+    run_options = tf.RunOptions(report_tensor_allocations_upon_oom=True)
+    tf.app.run(options=run_options)
