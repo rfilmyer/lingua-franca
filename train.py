@@ -2,6 +2,7 @@
 import tensorflow as tf
 import numpy as np
 tf.logging.set_verbosity(tf.logging.DEBUG)
+from sklearn.model_selection import train_test_split
 
 # Sound file stuff
 import numpy as np
@@ -122,12 +123,11 @@ def main(unused_argv):
     NUM_LANGUAGES = len(languages)
 
     print("creating images")
-    train_data = np.array([randomCrop(create_mfcc(filename)) for filename, language in file_list]).astype(np.float32)
-    print("Train Data Shape: ", train_data.shape)
-    train_labels = np.array([np.where(languages == language) for filename, language in file_list]).flatten()
-    print("Train Labels Shape: ", train_labels.shape)
-    eval_data = train_data
-    eval_labels = train_labels
+    data = np.array([randomCrop(create_mfcc(filename)) for filename, language in file_list]).astype(np.float32)
+    print("Data Shape: ", data.shape)
+    labels = np.array([np.where(languages == language) for filename, language in file_list]).flatten()
+    train_data, eval_data, train_labels, eval_labels = train_test_split(data, labels, test_size=0.10, random_state=42)
+    print("Labels Shape: ", labels.shape)
 
     # Create the Estimator
     mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir="/tmp/lingua-franca-model")
