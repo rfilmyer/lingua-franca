@@ -1,7 +1,7 @@
 # Tensorflow Imports
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
-tf.logging.set_verbosity(tf.logging.DEBUG)
+tf.logging.set_verbosity(tf.logging.INFO)
 
 # Sound file stuff
 import numpy as np
@@ -12,6 +12,7 @@ import random
 
 # Manage our files
 import voxforge
+import os
 
 # Verbosity flag
 import argparse
@@ -192,6 +193,24 @@ def main(unused_argv):
 
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
     print(eval_results)
+
+
+    # evaluate our audio
+    tf.logging.debug("Evaluating our clips")
+    ncf_languages = ["english", "german", "italian"]
+    ncf_files = [os.path.join("test-audio", + language + ".wav") for language in ncf_languages]
+    ncf_data = np.array([randomCrop(create_mfcc(filename)) for filename in ncf_files]).astype(np.float32)
+    ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
+
+    eval_ncf_audio_fn = tf.estimator.inputs.numpy_input_fn(
+        x={"x": ncf_data},
+        y=ncf_labels,
+        num_epochs=1,
+        shuffle=False
+    )
+
+    ncf_results = mnist_classifier.evaluate(input_fn=eval_ncf_audio_fn)
+    print(ncf_results)
 
 
 
