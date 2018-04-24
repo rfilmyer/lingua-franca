@@ -3,6 +3,26 @@
   <component name="ChangeListManager">
     <list default="true" id="fbf3833d-fa8f-4249-a07b-77406b0895fe" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/train2.py" beforeDir="false" afterPath="$PROJECT_DIR$/train2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-033.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-033.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-034.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-034.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-035.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-035.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-036.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-036.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-037.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-037.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-038.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-038.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-039.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-039.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-040.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-040.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-041.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-041.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-042.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/german/hersche-20170618-wpn_de9-042.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0615.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0615.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0616.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0616.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0617.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0617.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0618.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0618.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0619.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0619.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0620.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0620.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0621.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0621.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0622.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0622.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0623.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0623.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0624.wav" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/italian/wperw-20170829-naz_it-0624.wav" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -49,8 +69,8 @@
       <file leaf-file-name="train2.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/train2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="319">
-              <caret line="224" lean-forward="true" selection-start-line="224" selection-end-line="224" />
+            <state relative-caret-position="214">
+              <caret line="173" column="6" selection-start-line="173" selection-start-column="6" selection-end-line="173" selection-end-column="6" />
               <folding>
                 <element signature="e#21#44#0" expanded="true" />
               </folding>
@@ -282,10 +302,10 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="right" id="R Packages" order="3" />
       <window_info anchor="right" id="R Graphics" order="3" />
-      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
+      <window_info active="true" anchor="bottom" id="Event Log" order="7" sideWeight="0.5003849" side_tool="true" visible="true" weight="0.29541865" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.32994923" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.29541865" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4996151" visible="true" weight="0.29541865" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -431,8 +451,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/train2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="319">
-          <caret line="224" lean-forward="true" selection-start-line="224" selection-end-line="224" />
+        <state relative-caret-position="214">
+          <caret line="173" column="6" selection-start-line="173" selection-start-column="6" selection-end-line="173" selection-end-column="6" />
           <folding>
             <element signature="e#21#44#0" expanded="true" />
           </folding>
