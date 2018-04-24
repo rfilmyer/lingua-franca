@@ -167,6 +167,12 @@ def main(unused_argv):
     train_data, eval_data, train_labels, eval_labels = train_test_split(data, labels, test_size=0.10, random_state=42)
     tf.logging.debug("Split Training/Testing data.")
 
+    tf.logging.debug("processing NCF data")
+    ncf_languages = ["english", "german", "italian"]
+    ncf_files = [os.path.join("test-audio", "{0}.wav".format(language)) for language in ncf_languages]
+    ncf_data = np.array([randomCrop(create_mfcc(filename)) for filename in ncf_files]).astype(np.float32)
+    ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
+
     # Create the Estimator
     mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir="/tmp/lingua-franca-model")
 
@@ -194,14 +200,7 @@ def main(unused_argv):
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
     print(eval_results)
 
-
-    # evaluate our audio
-    tf.logging.debug("Evaluating our clips")
-    ncf_languages = ["english", "german", "italian"]
-    ncf_files = [os.path.join("test-audio" + language + ".wav") for language in ncf_languages]
-    ncf_data = np.array([randomCrop(create_mfcc(filename)) for filename in ncf_files]).astype(np.float32)
-    ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
-
+    tf.logging.debug("Evaluating our data")
     eval_ncf_audio_fn = tf.estimator.inputs.numpy_input_fn(
         x={"x": ncf_data},
         y=ncf_labels,

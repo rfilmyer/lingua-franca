@@ -49,8 +49,8 @@
       <file leaf-file-name="train2.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/train2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="109">
-              <caret line="200" column="42" selection-start-line="200" selection-start-column="42" selection-end-line="200" selection-end-column="42" />
+            <state relative-caret-position="319">
+              <caret line="224" lean-forward="true" selection-start-line="224" selection-end-line="224" />
               <folding>
                 <element signature="e#21#44#0" expanded="true" />
               </folding>
@@ -128,6 +128,12 @@
               <item name="lingua-franca" type="b2602c69:ProjectViewProjectNode" />
               <item name="lingua-franca" type="462c0819:PsiDirectoryNode" />
               <item name="voxforge" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lingua-franca" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lingua-franca" type="462c0819:PsiDirectoryNode" />
+              <item name="voxforge" type="462c0819:PsiDirectoryNode" />
+              <item name="zips" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -425,8 +431,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/train2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="109">
-          <caret line="200" column="42" selection-start-line="200" selection-start-column="42" selection-end-line="200" selection-end-column="42" />
+        <state relative-caret-position="319">
+          <caret line="224" lean-forward="true" selection-start-line="224" selection-end-line="224" />
           <folding>
             <element signature="e#21#44#0" expanded="true" />
           </folding>
