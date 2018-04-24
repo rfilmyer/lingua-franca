@@ -12,7 +12,6 @@ import random
 
 # Manage our files
 import voxforge
-import os
 
 # Verbosity flag
 import argparse
@@ -206,7 +205,7 @@ def main(unused_argv):
     #     y=ncf_labels,
     #     num_epochs=1,
     #     shuffle=False
-    )
+    # )
 
     # ncf_results = mnist_classifier.evaluate(input_fn=eval_ncf_audio_fn)
     # print(ncf_results)
