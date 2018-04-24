@@ -198,7 +198,7 @@ def main(unused_argv):
     # evaluate our audio
     tf.logging.debug("Evaluating our clips")
     ncf_languages = ["english", "german", "italian"]
-    ncf_files = [os.path.join("test-audio", + language + ".wav") for language in ncf_languages]
+    ncf_files = [os.path.join("test-audio" + language + ".wav") for language in ncf_languages]
     ncf_data = np.array([randomCrop(create_mfcc(filename)) for filename in ncf_files]).astype(np.float32)
     ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
 
