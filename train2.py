@@ -160,6 +160,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
 
 def main(unused_argv):
     file_list = voxforge.get_files()
+    file_list = random.sample(file_list, 500)
     languages = np.unique([entry[1] for entry in file_list])
     global NUM_LANGUAGES
     NUM_LANGUAGES = len(languages)
@@ -208,7 +209,7 @@ def main(unused_argv):
     train_input_fn = tf.estimator.inputs.numpy_input_fn(
         x={"x": train_data},
         y=train_labels,
-        batch_size=20,
+        batch_size=100,
         num_epochs=None,
         shuffle=True
     )
@@ -250,5 +251,5 @@ if __name__ == "__main__":
     if args.v:
         tf.logging.set_verbosity(tf.logging.DEBUG)
 
-    run_options = tf.RunOptions(report_tensor_allocations_upon_oom=True)
-    tf.app.run(options=run_options)
+    # run_options = tf.RunOptions(report_tensor_allocations_upon_oom=True)
+    tf.app.run()
