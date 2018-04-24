@@ -1,6 +1,5 @@
 # Tensorflow Imports
 import tensorflow as tf
-import numpy as np
 from sklearn.model_selection import train_test_split
 tf.logging.set_verbosity(tf.logging.DEBUG)
 
@@ -14,9 +13,12 @@ import random
 # Manage our files
 import voxforge
 
+# Verbosity flag
+import argparse
 
-# Fancy Typing
-# import typing
+
+parser = argparse.ArgumentParser(description="Tensorflow CNN model for language detection")
+parser.add_argument("-v", action="store_true", help="Turn on verbose logging")
 
 # # # SOUND FILES
 def create_mfcc(filename: str) -> np.ndarray:
@@ -70,10 +72,11 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         padding="same",
         activation=tf.nn.relu
     )
-    print("Conv 1 Layer Shape: ", conv1.shape)
+    tf.logging.debug("Conv 1 Layer Shape: %s", conv1.shape)
 
     
     pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[3, 3], strides=2)
+    tf.logging.debug("Pool 1 Layer Shape: %s", pool1.shape)
     ##############################################################################
     #ROUND2#######################################################################
     # Convolutional and Pooling Layer 2
@@ -84,8 +87,9 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         padding="same",
         activation=tf.nn.relu
     )
+    tf.logging.debug("Conv 2 Shape: %s", conv2.shape)
     pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[3, 3], strides=2)
-    print("Pool 2 Shape: ", pool2.shape)
+    tf.logging.debug("Pool 2 Shape: %s", pool2.shape)
     ##############################################################################
     #ROUND3#####################################################################
     # Convolutional/Pooling layer 3
@@ -96,7 +100,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         padding="same",
         activation=tf.nn.relu
     )
-    print("Conv 3 Layer Shape: ", conv3.shape)
+    tf.logging.debug("Conv 3 Layer Shape: %s", conv3.shape)
 
     
     pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=1)
@@ -110,18 +114,18 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         padding="same",
         activation=tf.nn.relu
     )
-    print("Conv 4 Layer Shape: ", conv4.shape)
+    tf.logging.debug("Conv 4 Layer Shape: %s", conv4.shape)
 
     
     pool4 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[4, 4], strides=2)"""
     ############################################################################
     # Fully Connected Layer
-    pool3_flat = tf.reshape(pool3, [-1, 4 * 73 * 64])  # 7x7 = image dimensions
-    print("Pool 2 Flat Shape: ", pool3_flat.shape)
+    pool3_flat = tf.reshape(pool3, [-1, 1 * 73 * 64])  # These dimensions should match those of the final pooling layer
+    tf.logging.debug("Pool 3 Flat Shape: %s", pool3_flat.shape)
     dense = tf.layers.dense(inputs=pool3_flat, units=1024, activation=tf.nn.relu)
-    print("Dense Shape: ", dense.shape)
+    tf.logging.debug("Dense Shape: %s", dense.shape)
     dropout = tf.layers.dropout(inputs=dense, training=mode == tf.estimator.ModeKeys.TRAIN)
-    print("Dropout: ", dropout.shape)
+    tf.logging.debug("Dropout Shape: %s", dropout.shape)
 
     # Logits Layer
     logits = tf.layers.dense(inputs=dropout, units=NUM_LANGUAGES)
@@ -135,9 +139,9 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Loss Function
-    print("labels ", labels.shape, " logits ", logits.shape)
+    tf.logging.debug("Labels Shape: %s", labels.shape, "Logits Shape:", logits.shape)
     loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-    print("Loss Shape: ", loss.shape)
+    tf.logging.debug("Loss Shape: %s", loss.shape)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
@@ -154,13 +158,13 @@ def main(unused_argv):
     global NUM_LANGUAGES
     NUM_LANGUAGES = len(languages)
 
-    print("creating images")
-    train_data = np.array([randomCrop(create_mfcc(filename)) for filename, language in file_list]).astype(np.float32)
-    print("Train Data Shape: ", train_data.shape)
-    train_labels = np.array([np.where(languages == language) for filename, language in file_list]).flatten()
-    print("Train Labels Shape: ", train_labels.shape)
-    eval_data = train_data
-    eval_labels = train_labels
+    tf.logging.debug("Creating images...")
+    data = np.array([randomCrop(create_mfcc(filename)) for filename, language in file_list]).astype(np.float32)
+    tf.logging.debug("Data Shape: %s", data.shape)
+    labels = np.array([np.where(languages == language) for filename, language in file_list]).flatten()
+    tf.logging.debug("Labels Shape: %s", labels.shape)
+    train_data, eval_data, train_labels, eval_labels = train_test_split(data, labels, test_size=0.10, random_state=42)
+    tf.logging.debug("Split Training/Testing data.")
 
     # Create the Estimator
     mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir="/tmp/lingua-franca-model")
@@ -194,5 +198,9 @@ def main(unused_argv):
 
 
 if __name__ == "__main__":
+    args = parser.parse_args()
+
+    if args.v:
+        tf.logging.set_verbosity(tf.logging.DEBUG)
 
     tf.app.run()
