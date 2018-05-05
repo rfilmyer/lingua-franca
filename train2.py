@@ -13,6 +13,7 @@ import random
 # Manage our files
 import voxforge
 import os
+import pickle
 
 # Verbosity flag
 import argparse
@@ -165,22 +166,12 @@ def main(unused_argv):
     global NUM_LANGUAGES
     NUM_LANGUAGES = len(languages)
 
-    tf.logging.debug("Creating images...")
-    images = []
-    raw_labels = []
-    for filename, language in file_list:
-        try:
-            image = create_mfcc(filename)
-        except ValueError as e:
-            tf.logging.warn("An audio file is messed up: %s", filename)
-        if image_is_big_enough(image):
-            cropped = randomCrop(image)
-            images.append(cropped)
-            raw_labels.append(language)
-        else:
-            tf.logging.debug("Small image: size is {image_shape}, min size is {height}x{width}".format(image_shape=image.shape,
-                                                                                                       width=IMAGE_WIDTH,
-                                                                                                       height=IMAGE_HEIGHT))
+    tf.logging.debug("Importing images...")
+    with open("mfccs.pkl", 'rb') as mfcc_inFile:
+        images = pickle.load(mfcc_inFile)
+    with open('raw_label.pkl', 'rb') as label_inFile:
+        raw_labels = pickle.load(label_inFile)
+    
     data = np.array(images).astype(np.float32)
     tf.logging.debug("Data Shape: %s", data.shape)
 
