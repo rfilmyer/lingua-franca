@@ -92,5 +92,5 @@ with open('mfccs.pkl', 'wb') as mfcc_outFile:
     pickle.dump(images, mfcc_outFile)
 
 with open('raw_label.pkl', 'wb') as label_outFile:
-    pickle.dump(languages, label_outFile)
+    pickle.dump(raw_labels, label_outFile)
 

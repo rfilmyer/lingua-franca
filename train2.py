@@ -161,7 +161,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
 
 def main(unused_argv):
     file_list = voxforge.get_files()
-    file_list = random.sample(file_list, 500)
+    file_list = random.sample(file_list, 100)
     languages = np.unique([entry[1] for entry in file_list])
     global NUM_LANGUAGES
     NUM_LANGUAGES = len(languages)
@@ -171,6 +171,7 @@ def main(unused_argv):
         images = pickle.load(mfcc_inFile)
     with open('raw_label.pkl', 'rb') as label_inFile:
         raw_labels = pickle.load(label_inFile)
+    print("length of raw_labels: ", len(raw_labels))
     
     data = np.array(images).astype(np.float32)
     tf.logging.debug("Data Shape: %s", data.shape)
