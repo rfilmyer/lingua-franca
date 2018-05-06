@@ -192,7 +192,7 @@ def main(unused_argv):
     # ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
 
     # Create the Estimator
-    mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir="/tmp/lingua-franca-model")
+    mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir="./lingua-franca-model")
 
     # Set up logging
     tensors_to_log = {"probabilities": "softmax_tensor"}
@@ -221,8 +221,7 @@ def main(unused_argv):
 
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
     print("Eval Results: %s" % eval_results)
-    saver = tf.train.Saver()
-    saver.save(name='saved-model')
+
     # tf.logging.debug("Evaluating our data")
     # eval_ncf_audio_fn = tf.estimator.inputs.numpy_input_fn(
     #     x={"x": ncf_data},
