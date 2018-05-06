@@ -221,7 +221,8 @@ def main(unused_argv):
 
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
     print("Eval Results: %s" % eval_results)
-
+    saver = tf.train.Saver()
+    saver.save(name='saved-model')
     # tf.logging.debug("Evaluating our data")
     # eval_ncf_audio_fn = tf.estimator.inputs.numpy_input_fn(
     #     x={"x": ncf_data},
