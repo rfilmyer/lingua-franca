@@ -1,0 +1,1 @@
+scp -Cr english roger.filmyer@dsgpu01:/home/roger.filmyer/lingua-franca/voxforge/english

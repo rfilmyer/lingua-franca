@@ -13,12 +13,14 @@ import random
 # Manage our files
 import voxforge
 import os
-import hashlib
+import tempfile
 
 # Verbosity flag
 import argparse
 
-MODEL_DIR = "/tmp/lingua-franca-model"
+# # # MODEL SETTINGS
+MODEL_DIR = os.path.join(tempfile.gettempdir(), "lingua-franca-model")
+
 parser = argparse.ArgumentParser(description="Tensorflow CNN model for language detection")
 parser.add_argument("-v", action="store_true", help="Turn on verbose logging")
 parser.add_argument("--modeldir", default=MODEL_DIR, help="Directory in which to store the model info")
@@ -31,6 +33,9 @@ def create_mfcc(filename: str) -> np.ndarray:
     bitrate, signal = wav.read(filename)
     mfcc_data = mfcc(signal, bitrate, nfft=1200)
     return mfcc_data
+
+
+NUM_LANGUAGES = 3  # This is a default that should get reset
 
 # # # IMAGE SETTINGS
 IMAGE_WIDTH = 13
@@ -49,9 +54,6 @@ def randomCrop(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT
     img = img[y:y + height, x:x + width]
     return img
 
-global NUM_LANGUAGES
-NUM_LANGUAGES = 3  # This is a default that should get reset
-
 
 
 # # # MODEL ARCHITECTURE
@@ -61,6 +63,10 @@ NUM_LANGUAGES = 3  # This is a default that should get reset
 # Fully Connected Layer
 # Softmax
 
+# Current Model architecture:
+# 6 convolutional layers: 7x7, 5x5, 3x3, with ReLU, 3x3/2 pooling
+# One fully connected layer
+# Final softmax layer
 
 # Ultimate Model architecture:
 # 6 convolutional layers: 7x7, 5x5, 3x3, 3x3, 3x3, 3x3, with ReLU
@@ -85,11 +91,10 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     )
     tf.logging.debug("Conv 1 Layer Shape: %s", conv1.shape)
 
-    
     pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[3, 3], strides=2)
     tf.logging.debug("Pool 1 Layer Shape: %s", pool1.shape)
-    ##############################################################################
-    #ROUND2#######################################################################
+    # #############################################################################
+    # ROUND2#######################################################################
     # Convolutional and Pooling Layer 2
     conv2 = tf.layers.conv2d(
         inputs=pool1,
@@ -101,8 +106,8 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     tf.logging.debug("Conv 2 Shape: %s", conv2.shape)
     pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[3, 3], strides=2)
     tf.logging.debug("Pool 2 Shape: %s", pool2.shape)
-    ##############################################################################
-    #ROUND3#####################################################################
+    # #############################################################################
+    # ROUND3#####################################################################
     # Convolutional/Pooling layer 3
     conv3 = tf.layers.conv2d(
         inputs=pool2,
@@ -113,10 +118,9 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     )
     tf.logging.debug("Conv 3 Layer Shape: %s", conv3.shape)
 
-    
     pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=1)
-    ############################################################################
-    #ROUND4#####################################################################
+    # ###########################################################################
+    # ROUND4#####################################################################
     # Convolutional/Pooling layer 4
     """conv4 = tf.layers.conv2d(
         inputs=pool3,
@@ -154,12 +158,16 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
     tf.logging.debug("Loss Shape: %s", loss.shape)
 
+    accuracy = tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])
+    tf.summary.scalar("accuracy", accuracy[1])
+
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
         train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
-    eval_metric_ops = {"accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])}
+    # if mode == tf.estimator.ModeKeys.EVAL:
+    eval_metric_ops = {"accuracy": accuracy}
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
 
@@ -181,18 +189,20 @@ def main(unused_argv):
         images = []
         raw_labels = []
         for filename, language in file_list:
+            image = np.zeros([1, 1])
             try:
                 image = create_mfcc(filename)
-            except ValueError as e:
+            except ValueError:
                 tf.logging.warn("An audio file is messed up: %s", filename)
             if image_is_big_enough(image):
                 cropped = randomCrop(image)
                 images.append(cropped)
                 raw_labels.append(language)
             else:
-                tf.logging.debug("Small image: size is {image_shape}, min size is {height}x{width}".format(image_shape=image.shape,
-                                                                                                           width=IMAGE_WIDTH,
-                                                                                                           height=IMAGE_HEIGHT))
+                tf.logging.debug("Small image: size is {image_shape}, "
+                                 "min size is {height}x{width}".format(image_shape=image.shape,
+                                                                       width=IMAGE_WIDTH,
+                                                                       height=IMAGE_HEIGHT))
         tf.logging.debug("Done converting images.")
         data = np.array(images).astype(np.float32)
         raw_labels = np.array(raw_labels)
@@ -202,9 +212,9 @@ def main(unused_argv):
     labels = np.array([np.where(languages == language) for language in raw_labels]).flatten()
     tf.logging.debug("Labels Shape: %s", labels.shape)
 
-    #data = np.array([randomCrop(create_mfcc(filename)) for filename, language in file_list]).astype(np.float32)
+    # data = np.array([randomCrop(create_mfcc(filename)) for filename, language in file_list]).astype(np.float32)
 
-    #labels = np.array([np.where(languages == language) for filename, language in file_list]).flatten()
+    # labels = np.array([np.where(languages == language) for filename, language in file_list]).flatten()
     train_data, eval_data, train_labels, eval_labels = train_test_split(data, labels, test_size=0.10, random_state=42)
     tf.logging.debug("Split Training/Testing data.")
 
@@ -215,6 +225,7 @@ def main(unused_argv):
     # ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
 
     # Create the Estimator
+    tf.logging.info("Model Directory: %s", MODEL_DIR)
     mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir=MODEL_DIR)
 
     # Set up logging
@@ -255,9 +266,6 @@ def main(unused_argv):
     #
     # ncf_results = mnist_classifier.evaluate(input_fn=eval_ncf_audio_fn)
     # print("NCF Results: %s" % ncf_results)
-
-
-
 
 
 if __name__ == "__main__":
