@@ -18,9 +18,10 @@ import hashlib
 # Verbosity flag
 import argparse
 
-
+MODEL_DIR = "/tmp/lingua-franca-model"
 parser = argparse.ArgumentParser(description="Tensorflow CNN model for language detection")
 parser.add_argument("-v", action="store_true", help="Turn on verbose logging")
+parser.add_argument("--modeldir", default=MODEL_DIR, help="Directory in which to store the model info")
 
 # # # SOUND FILES
 
@@ -71,7 +72,7 @@ NUM_LANGUAGES = 3  # This is a default that should get reset
 # we do something custom here
 def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     input_layer = tf.reshape(features["x"], [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
-    print("Input Layer Shape: ", input_layer.shape)
+    tf.logging.debug("Input Layer Shape: %s", input_layer.shape)
 
     #ROUND1#####################################################################
     # Convolutional/Pooling layer 1
@@ -149,7 +150,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Loss Function
-    tf.logging.debug("Labels Shape: %s", labels.shape, "Logits Shape:", logits.shape)
+    tf.logging.debug("Labels Shape: %s, Logits Shape: %s", labels.shape, logits.shape)
     loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
     tf.logging.debug("Loss Shape: %s", loss.shape)
 
@@ -264,6 +265,7 @@ if __name__ == "__main__":
 
     if args.v:
         tf.logging.set_verbosity(tf.logging.DEBUG)
+    MODEL_DIR = args.modeldir
 
     # run_options = tf.RunOptions(report_tensor_allocations_upon_oom=True)
     tf.app.run()
