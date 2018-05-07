@@ -13,6 +13,7 @@ import random
 # Manage our files
 import voxforge
 import os
+import hashlib
 
 # Verbosity flag
 import argparse
@@ -22,6 +23,9 @@ parser = argparse.ArgumentParser(description="Tensorflow CNN model for language 
 parser.add_argument("-v", action="store_true", help="Turn on verbose logging")
 
 # # # SOUND FILES
+
+MFCC_FILE_NAME = "mfccs.npz"
+
 def create_mfcc(filename: str) -> np.ndarray:
     bitrate, signal = wav.read(filename)
     mfcc_data = mfcc(signal, bitrate, nfft=1200)
@@ -160,30 +164,40 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
 
 def main(unused_argv):
     file_list = voxforge.get_files()
-    file_list = random.sample(file_list, 500)
+    # file_list = random.sample(file_list, 500)
     languages = np.unique([entry[1] for entry in file_list])
     global NUM_LANGUAGES
     NUM_LANGUAGES = len(languages)
 
-    tf.logging.debug("Creating images...")
-    images = []
-    raw_labels = []
-    for filename, language in file_list:
-        try:
-            image = create_mfcc(filename)
-        except ValueError as e:
-            tf.logging.warn("An audio file is messed up: %s", filename)
-        if image_is_big_enough(image):
-            cropped = randomCrop(image)
-            images.append(cropped)
-            raw_labels.append(language)
-        else:
-            tf.logging.debug("Small image: size is {image_shape}, min size is {height}x{width}".format(image_shape=image.shape,
-                                                                                                       width=IMAGE_WIDTH,
-                                                                                                       height=IMAGE_HEIGHT))
-    data = np.array(images).astype(np.float32)
-    tf.logging.debug("Data Shape: %s", data.shape)
+    # Have we computed MFCCs before?
+    if os.path.exists(MFCC_FILE_NAME):
+        tf.logging.info("Loading saved images...")
+        loaded_data = np.load(MFCC_FILE_NAME)
+        data = loaded_data["data"]
+        raw_labels = loaded_data["raw_labels"]
+    else:
+        tf.logging.info("Creating new images...")
+        images = []
+        raw_labels = []
+        for filename, language in file_list:
+            try:
+                image = create_mfcc(filename)
+            except ValueError as e:
+                tf.logging.warn("An audio file is messed up: %s", filename)
+            if image_is_big_enough(image):
+                cropped = randomCrop(image)
+                images.append(cropped)
+                raw_labels.append(language)
+            else:
+                tf.logging.debug("Small image: size is {image_shape}, min size is {height}x{width}".format(image_shape=image.shape,
+                                                                                                           width=IMAGE_WIDTH,
+                                                                                                           height=IMAGE_HEIGHT))
+        tf.logging.debug("Done converting images.")
+        data = np.array(images).astype(np.float32)
+        raw_labels = np.array(raw_labels)
+        np.savez_compressed(MFCC_FILE_NAME, data=data, raw_labels=raw_labels)
 
+    tf.logging.debug("Data Shape: %s", data.shape)
     labels = np.array([np.where(languages == language) for language in raw_labels]).flatten()
     tf.logging.debug("Labels Shape: %s", labels.shape)
 
