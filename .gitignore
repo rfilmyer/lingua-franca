@@ -1,3 +1,6 @@
+# Array of converted MFCCs
+mfccs.npz
+
 # Voxforge data should no longer be tracked
 voxforge/english/
 voxforge/german/

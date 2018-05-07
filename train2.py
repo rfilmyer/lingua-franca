@@ -215,7 +215,7 @@ def main(unused_argv):
     # ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
 
     # Create the Estimator
-    mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir="/tmp/lingua-franca-model")
+    mnist_classifier = tf.estimator.Estimator(model_fn=cnn_model_fn, model_dir=MODEL_DIR)
 
     # Set up logging
     tensors_to_log = {"probabilities": "softmax_tensor"}
