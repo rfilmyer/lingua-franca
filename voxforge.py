@@ -1,7 +1,12 @@
 import os
+import random
+
+import scipy.io.wavfile as wav
+from python_speech_features.base import mfcc
 
 from typing import List, Tuple, Union
 FilePath = Union[str, bytes]
+
 
 
 def get_files(voxforge_directory: FilePath = "voxforge") -> List[Tuple[FilePath, str]]:
@@ -23,6 +28,29 @@ def get_files(voxforge_directory: FilePath = "voxforge") -> List[Tuple[FilePath,
             file_list.append((soundfile_path, language_folder))
 
     return file_list
+
+
+# # # IMAGE SETTINGS
+IMAGE_WIDTH = 13
+IMAGE_HEIGHT = 300
+
+
+def image_is_big_enough(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT) -> bool:
+    return img.shape[0] >= height and img.shape[1] >= width
+
+
+def randomCrop(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT) -> np.ndarray:
+    assert img.shape[0] >= height
+    assert img.shape[1] >= width
+    x = random.randint(0, img.shape[1] - width)
+    y = random.randint(0, img.shape[0] - height)
+    img = img[y:y + height, x:x + width]
+    return img
+
+def create_mfcc(filename: str) -> np.ndarray:
+    bitrate, signal = wav.read(filename)
+    mfcc_data = mfcc(signal, bitrate, nfft=1200)
+    return mfcc_data
 
 if __name__ == "__main__":
 

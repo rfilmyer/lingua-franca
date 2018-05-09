@@ -5,9 +5,6 @@ tf.logging.set_verbosity(tf.logging.INFO)
 
 # Sound file stuff
 import numpy as np
-import scipy.io.wavfile as wav
-from python_speech_features.base import mfcc
-import random
 
 
 # Manage our files
@@ -29,30 +26,8 @@ parser.add_argument("--modeldir", default=MODEL_DIR, help="Directory in which to
 
 MFCC_FILE_NAME = "mfccs.npz"
 
-def create_mfcc(filename: str) -> np.ndarray:
-    bitrate, signal = wav.read(filename)
-    mfcc_data = mfcc(signal, bitrate, nfft=1200)
-    return mfcc_data
-
 
 NUM_LANGUAGES = 3  # This is a default that should get reset
-
-# # # IMAGE SETTINGS
-IMAGE_WIDTH = 13
-IMAGE_HEIGHT = 300
-
-
-def image_is_big_enough(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT) -> bool:
-    return img.shape[0] >= height and img.shape[1] >= width
-
-
-def randomCrop(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT) -> np.ndarray:
-    assert img.shape[0] >= height
-    assert img.shape[1] >= width
-    x = random.randint(0, img.shape[1] - width)
-    y = random.randint(0, img.shape[0] - height)
-    img = img[y:y + height, x:x + width]
-    return img
 
 
 
@@ -77,7 +52,7 @@ def randomCrop(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT
 # Input Layer
 # we do something custom here
 def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
-    input_layer = tf.reshape(features["mfccs"], [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
+    input_layer = tf.reshape(features["mfccs"], [-1, voxforge.IMAGE_HEIGHT, voxforge.IMAGE_WIDTH, 1])
     tf.logging.debug("Input Layer Shape: %s", input_layer.shape)
 
     #ROUND1#####################################################################
@@ -194,18 +169,18 @@ def main(unused_argv):
         for filename, language in voxforge.get_files():
             image = np.zeros([1, 1])
             try:
-                image = create_mfcc(filename)
+                image = voxforge.create_mfcc(filename)
             except ValueError:
                 tf.logging.warn("An audio file is messed up: %s", filename)
-            if image_is_big_enough(image):
-                cropped = randomCrop(image)
+            if voxforge.image_is_big_enough(image):
+                cropped = voxforge.randomCrop(image)
                 images.append(cropped)
                 raw_labels.append(language)
             else:
                 tf.logging.debug("Small image: size is {image_shape}, "
                                  "min size is {height}x{width}".format(image_shape=image.shape,
-                                                                       width=IMAGE_WIDTH,
-                                                                       height=IMAGE_HEIGHT))
+                                                                       width=voxforge.IMAGE_WIDTH,
+                                                                       height=voxforge.IMAGE_HEIGHT))
         tf.logging.debug("Done converting images.")
         data = np.array(images).astype(np.float32)
         raw_labels = np.array(raw_labels)
@@ -213,7 +188,7 @@ def main(unused_argv):
 
     tf.logging.debug("Data Shape: %s", data.shape)
 
-    language_list = np.unique(raw_labels)
+    language_list = np.unique(raw_labels).sort()
     tf.logging.debug("Languages detected: %s", language_list)
     global NUM_LANGUAGES
     NUM_LANGUAGES = len(language_list)
