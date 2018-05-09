@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fbf3833d-fa8f-4249-a07b-77406b0895fe" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/predict.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train2.py" beforeDir="false" afterPath="$PROJECT_DIR$/train2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/voxforge/batch_upload.sh" beforeDir="false" afterPath="$PROJECT_DIR$/voxforge/batch_upload.sh" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -30,7 +30,7 @@
       <file leaf-file-name="voxforge.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/voxforge.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
+            <state relative-caret-position="255">
               <caret line="19" column="21" selection-start-line="19" selection-start-column="12" selection-end-line="19" selection-end-column="21" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -42,10 +42,24 @@
       <file leaf-file-name="train2.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/train2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="37" column="26" selection-start-line="37" selection-start-column="26" selection-end-line="37" selection-end-column="26" />
+            <state relative-caret-position="306">
+              <caret line="265" column="33" lean-forward="true" selection-start-line="265" selection-start-column="33" selection-end-line="265" selection-end-column="33" />
               <folding>
                 <element signature="e#21#44#0" expanded="true" />
+                <element signature="e#6432#6602#0" />
+                <element signature="e#6621#7720#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="predict.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/predict.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="411">
+              <caret line="35" column="40" selection-start-line="35" selection-start-column="40" selection-end-line="35" selection-end-column="40" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -65,8 +79,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="Jupyter Notebook" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -79,6 +93,8 @@
       <find>feature</find>
       <find>input</find>
       <find>/tmp/</find>
+      <find>input_layer</find>
+      <find>&quot;ge</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -92,21 +108,23 @@
         <option value="$USER_HOME$/anaconda3/lib/python3.6/site-packages/tensorflow/python/estimator/inputs/numpy_io.py" />
         <option value="$PROJECT_DIR$/mfcc_check.ipynb" />
         <option value="$PROJECT_DIR$/train.py" />
+        <option value="$PROJECT_DIR$/predict.py" />
         <option value="$PROJECT_DIR$/train2.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="67" />
-    <option name="y" value="25" />
-    <option name="width" value="1299" />
-    <option name="height" value="743" />
+    <option name="x" value="27" />
+    <option name="y" value="62" />
+    <option name="width" value="1289" />
+    <option name="height" value="555" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -118,7 +136,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -137,7 +154,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.train2">
+  <component name="RunManager" selected="Python.predict">
     <configuration name="lingua-franca" type="JupiterNotebook" factoryName="Jupyter Notebook">
       <module name="lingua-franca" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -167,6 +184,24 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/voxforge/extract_voxforge.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
+    <configuration name="predict" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="lingua-franca" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/predict.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -232,9 +267,11 @@
       <item itemvalue="Python.voxforge" />
       <item itemvalue="Python.train" />
       <item itemvalue="Python.train2" />
+      <item itemvalue="Python.predict" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.predict" />
         <item itemvalue="Python.train2" />
         <item itemvalue="Python.train" />
         <item itemvalue="Python.voxforge" />
@@ -258,63 +295,31 @@
     <frame x="67" y="25" width="1299" height="743" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23402618" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="R Packages" order="3" />
-      <window_info anchor="right" id="R Graphics" order="3" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5019246" side_tool="true" visible="true" weight="0.29541865" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50269437" side_tool="true" visible="true" weight="0.22116904" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.32994923" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49807546" visible="true" weight="0.29541865" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49730563" visible="true" weight="0.22116904" />
       <window_info anchor="bottom" id="Terminal" order="7" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23402618" />
+      <window_info anchor="right" id="R Packages" order="3" />
+      <window_info anchor="right" id="R Graphics" order="3" />
+      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4996151" weight="0.328594" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4996151" weight="0.39968404" />
-      <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23402618" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="R Graphics" order="3" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49884528" visible="true" weight="0.29541865" />
-      <window_info anchor="right" id="R Packages" order="3" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4996151" weight="0.39968404" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.5011547" side_tool="true" visible="true" weight="0.29541865" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Terminal" order="7" />
-      <window_info anchor="bottom" id="Python Console" order="7" weight="0.32994923" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/train2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2220">
-          <caret line="148" column="15" selection-start-line="148" selection-start-column="15" selection-end-line="148" selection-end-column="15" />
-          <folding>
-            <element signature="e#21#44#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/voxforge/extract_voxforge.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="10" column="27" selection-start-line="10" selection-start-column="27" selection-end-line="10" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/voxforge.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
@@ -359,6 +364,8 @@
           <caret line="148" column="15" lean-forward="true" selection-start-line="148" selection-start-column="15" selection-end-line="148" selection-end-column="15" />
           <folding>
             <element signature="e#21#44#0" expanded="true" />
+            <element signature="e#6432#6602#0" />
+            <element signature="e#6621#7720#0" />
           </folding>
         </state>
       </provider>
@@ -417,6 +424,8 @@
           <caret line="62" lean-forward="true" selection-start-line="62" selection-end-line="62" />
           <folding>
             <element signature="e#21#44#0" expanded="true" />
+            <element signature="e#6432#6602#0" />
+            <element signature="e#6621#7720#0" />
           </folding>
         </state>
       </provider>
@@ -567,6 +576,8 @@
           <caret line="237" column="21" lean-forward="true" selection-start-line="237" selection-start-column="21" selection-end-line="237" selection-end-column="21" />
           <folding>
             <element signature="e#21#44#0" expanded="true" />
+            <element signature="e#6432#6602#0" />
+            <element signature="e#6621#7720#0" />
           </folding>
         </state>
       </provider>
@@ -703,8 +714,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/voxforge.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
+        <state relative-caret-position="255">
           <caret line="19" column="21" selection-start-line="19" selection-start-column="12" selection-end-line="19" selection-end-column="21" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/client.config">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/predict.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="411">
+          <caret line="35" column="40" selection-start-line="35" selection-start-column="40" selection-end-line="35" selection-end-column="40" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
@@ -713,10 +737,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/train2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="37" column="26" selection-start-line="37" selection-start-column="26" selection-end-line="37" selection-end-column="26" />
+        <state relative-caret-position="306">
+          <caret line="265" column="33" lean-forward="true" selection-start-line="265" selection-start-column="33" selection-end-line="265" selection-end-column="33" />
           <folding>
             <element signature="e#21#44#0" expanded="true" />
+            <element signature="e#6432#6602#0" />
+            <element signature="e#6621#7720#0" />
           </folding>
         </state>
       </provider>

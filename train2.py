@@ -23,7 +23,7 @@ MODEL_DIR = os.path.join(tempfile.gettempdir(), "lingua-franca-model")
 
 parser = argparse.ArgumentParser(description="Tensorflow CNN model for language detection")
 parser.add_argument("-v", action="store_true", help="Turn on verbose logging")
-parser.add_argument("--modeldir", default=MODEL_DIR, help="Directory in which to store the model info")
+parser.add_argument("--modeldir", default=MODEL_DIR, help="Directory in which to find the model info")
 
 # # # SOUND FILES
 
@@ -77,7 +77,7 @@ def randomCrop(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT
 # Input Layer
 # we do something custom here
 def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
-    input_layer = tf.reshape(features["x"], [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
+    input_layer = tf.reshape(features["mfccs"], [-1, IMAGE_HEIGHT, IMAGE_WIDTH, 1])
     tf.logging.debug("Input Layer Shape: %s", input_layer.shape)
 
     #ROUND1#####################################################################
@@ -151,6 +151,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     }
 
     if mode == tf.estimator.ModeKeys.PREDICT:
+        tf.logging.debug("Making Predictions...")
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     # Loss Function
@@ -166,17 +167,16 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
-    # if mode == tf.estimator.ModeKeys.EVAL:
-    eval_metric_ops = {"accuracy": accuracy}
-    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+    elif mode == tf.estimator.ModeKeys.EVAL:
+        eval_metric_ops = {"accuracy": accuracy}
+        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+
+    tf.logging.warn("Current mode is %s, expected %s", mode, (tf.estimator.ModeKeys.PREDICT,
+                                                              tf.estimator.ModeKeys.TRAIN,
+                                                              tf.estimator.ModeKeys.EVAL))
 
 
 def main(unused_argv):
-    file_list = voxforge.get_files()
-    # file_list = random.sample(file_list, 500)
-    languages = np.unique([entry[1] for entry in file_list])
-    global NUM_LANGUAGES
-    NUM_LANGUAGES = len(languages)
 
     # Have we computed MFCCs before?
     if os.path.exists(MFCC_FILE_NAME):
@@ -188,7 +188,7 @@ def main(unused_argv):
         tf.logging.info("Creating new images...")
         images = []
         raw_labels = []
-        for filename, language in file_list:
+        for filename, language in voxforge.get_files():
             image = np.zeros([1, 1])
             try:
                 image = create_mfcc(filename)
@@ -209,20 +209,17 @@ def main(unused_argv):
         np.savez_compressed(MFCC_FILE_NAME, data=data, raw_labels=raw_labels)
 
     tf.logging.debug("Data Shape: %s", data.shape)
-    labels = np.array([np.where(languages == language) for language in raw_labels]).flatten()
+
+    language_list = np.unique(raw_labels)
+    tf.logging.debug("Languages detected: %s", language_list)
+    global NUM_LANGUAGES
+    NUM_LANGUAGES = len(language_list)
+
+    labels = np.array([np.where(language_list == language) for language in raw_labels]).flatten()
     tf.logging.debug("Labels Shape: %s", labels.shape)
 
-    # data = np.array([randomCrop(create_mfcc(filename)) for filename, language in file_list]).astype(np.float32)
-
-    # labels = np.array([np.where(languages == language) for filename, language in file_list]).flatten()
     train_data, eval_data, train_labels, eval_labels = train_test_split(data, labels, test_size=0.10, random_state=42)
     tf.logging.debug("Split Training/Testing data.")
-
-    # tf.logging.debug("processing NCF data")
-    # ncf_languages = ["english", "german", "italian"]
-    # ncf_files = [os.path.join("test-audio", "{0}.wav".format(language)) for language in ncf_languages]
-    # ncf_data = np.array([randomCrop(create_mfcc(filename)) for filename in ncf_files]).astype(np.float32)
-    # ncf_labels = np.array([np.where(languages == language) for language in ncf_languages]).flatten()
 
     # Create the Estimator
     tf.logging.info("Model Directory: %s", MODEL_DIR)
@@ -233,7 +230,7 @@ def main(unused_argv):
     logging_hook = tf.train.LoggingTensorHook(tensors=tensors_to_log, every_n_iter=50)
 
     train_input_fn = tf.estimator.inputs.numpy_input_fn(
-        x={"x": train_data},
+        x={"mfccs": train_data},
         y=train_labels,
         batch_size=100,
         num_epochs=None,
@@ -243,7 +240,7 @@ def main(unused_argv):
     train_spec = tf.estimator.TrainSpec(input_fn=train_input_fn, max_steps=20000, hooks=[logging_hook])
 
     eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-        x={"x": eval_data},
+        x={"mfccs": eval_data},
         y=eval_labels,
         num_epochs=1,
         shuffle=False
@@ -256,16 +253,19 @@ def main(unused_argv):
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
     print("Eval Results: %s" % eval_results)
 
-    # tf.logging.debug("Evaluating our data")
-    # eval_ncf_audio_fn = tf.estimator.inputs.numpy_input_fn(
-    #     x={"x": ncf_data},
-    #     y=ncf_labels,
-    #     num_epochs=1,
-    #     shuffle=False
-    # )
-    #
-    # ncf_results = mnist_classifier.evaluate(input_fn=eval_ncf_audio_fn)
-    # print("NCF Results: %s" % ncf_results)
+    def serving_input_receiver_fn():
+        """Build the serving inputs."""
+        # The outer dimension (None) allows us to batch up inputs for
+        # efficiency. However, it also means that if we want a prediction
+        # for a single instance, we'll need to wrap it in an outer list.
+        inputs = {"x": tf.placeholder(shape=[None, 1], dtype=tf.float32)}
+        return tf.estimator.export.ServingInputReceiver(inputs, inputs)
+
+    export_dir = mnist_classifier.export_savedmodel(
+        export_dir_base=MODEL_DIR,
+        serving_input_receiver_fn=serving_input_receiver_fn)
+
+    print("Model exported to: {0}".format(export_dir))
 
 
 if __name__ == "__main__":
