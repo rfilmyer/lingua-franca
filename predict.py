@@ -39,6 +39,7 @@ ncf_labels = np.array([np.where(language_list == language) for language in ncf_l
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    MODEL_DIR = args.modeldir
     predict_fn = tf.contrib.predictor.from_saved_model(MODEL_DIR)
     predictions = predict_fn(
         {"mfccs": ncf_data})
