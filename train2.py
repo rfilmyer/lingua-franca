@@ -152,7 +152,8 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
 
     if mode == tf.estimator.ModeKeys.PREDICT:
         tf.logging.debug("Making Predictions...")
-        export_outputs = {'predict_output': tf.estimator.export.PredictOutput({"pred_output_classes": predictions, 'probabilities': predictions["probabilities"]})}
+        export_outputs = {'predict_output': tf.estimator.export.PredictOutput({"pred_output_classes": predictions,
+                                                                               'probabilities': predictions["probabilities"]})}
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions, export_outputs=export_outputs)
 
     # Loss Function
@@ -259,6 +260,7 @@ def main(unused_argv):
         # The outer dimension (None) allows us to batch up inputs for
         # efficiency. However, it also means that if we want a prediction
         # for a single instance, we'll need to wrap it in an outer list.
+        tf.logging.debug("building input receiver")
         inputs = {"mfccs": tf.placeholder(shape=[None, 1], dtype=tf.float32)}
         return tf.estimator.export.ServingInputReceiver(inputs, inputs)
 
