@@ -152,7 +152,8 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
 
     if mode == tf.estimator.ModeKeys.PREDICT:
         tf.logging.debug("Making Predictions...")
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+        export_outputs = {'predict_output': tf.estimator.export.PredictOutput({"pred_output_classes": predictions, 'probabilities': predictions["probabilities"]})}
+        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions, export_outputs=export_outputs)
 
     # Loss Function
     tf.logging.debug("Labels Shape: %s, Logits Shape: %s", labels.shape, logits.shape)
