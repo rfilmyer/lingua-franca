@@ -258,7 +258,7 @@ def main(unused_argv):
         # The outer dimension (None) allows us to batch up inputs for
         # efficiency. However, it also means that if we want a prediction
         # for a single instance, we'll need to wrap it in an outer list.
-        inputs = {"x": tf.placeholder(shape=[None, 1], dtype=tf.float32)}
+        inputs = {"mfccs": tf.placeholder(shape=[None, 1], dtype=tf.float32)}
         return tf.estimator.export.ServingInputReceiver(inputs, inputs)
 
     export_dir = mnist_classifier.export_savedmodel(
