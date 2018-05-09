@@ -43,4 +43,4 @@ if __name__ == "__main__":
     predict_fn = tf.contrib.predictor.from_saved_model(MODEL_DIR)
     predictions = predict_fn(
         {"mfccs": ncf_data})
-    print(predictions['scores'])
+    print(predictions)
