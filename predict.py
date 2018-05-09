@@ -17,7 +17,7 @@ parser.add_argument("--modeldir", default=MODEL_DIR, help="Directory in which to
 MFCC_FILE_NAME = "mfccs.npz"
 loaded_data = np.load(MFCC_FILE_NAME)
 raw_labels = loaded_data["raw_labels"]
-language_list = np.unique(raw_labels).sort()
+language_list = np.sort(np.unique(raw_labels))
 
 
 tf.logging.debug("processing NCF data")

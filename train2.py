@@ -188,7 +188,7 @@ def main(unused_argv):
 
     tf.logging.debug("Data Shape: %s", data.shape)
 
-    language_list = np.unique(raw_labels).sort()
+    language_list = np.sort(np.unique(raw_labels))
     tf.logging.debug("Languages detected: %s", language_list)
     global NUM_LANGUAGES
     NUM_LANGUAGES = len(language_list)

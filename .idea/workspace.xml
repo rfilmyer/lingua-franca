@@ -37,8 +37,8 @@
       <file leaf-file-name="train2.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/train2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="246">
-              <caret line="239" column="62" selection-start-line="239" selection-start-column="62" selection-end-line="239" selection-end-column="62" />
+            <state relative-caret-position="317">
+              <caret line="190" column="50" selection-start-line="190" selection-start-column="50" selection-end-line="190" selection-end-column="50" />
               <folding>
                 <element signature="e#21#44#0" expanded="true" />
               </folding>
@@ -149,7 +149,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.predict">
+  <component name="RunManager" selected="Python.train2">
     <configuration name="lingua-franca" type="JupiterNotebook" factoryName="Jupyter Notebook">
       <module name="lingua-franca" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -266,8 +266,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.predict" />
         <item itemvalue="Python.train2" />
+        <item itemvalue="Python.predict" />
         <item itemvalue="Python.train" />
         <item itemvalue="Python.voxforge" />
       </list>
@@ -702,8 +702,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/train2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="239" column="62" selection-start-line="239" selection-start-column="62" selection-end-line="239" selection-end-column="62" />
+        <state relative-caret-position="317">
+          <caret line="190" column="50" selection-start-line="190" selection-start-column="50" selection-end-line="190" selection-end-column="50" />
           <folding>
             <element signature="e#21#44#0" expanded="true" />
           </folding>
