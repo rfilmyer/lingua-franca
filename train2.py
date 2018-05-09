@@ -128,7 +128,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     if mode == tf.estimator.ModeKeys.PREDICT:
         tf.logging.debug("Making Predictions...")
         tf.logging.debug("Probabilities: %s", predictions["probabilities"])
-        export_outputs = {'predict_output': tf.estimator.export.PredictOutput({"pred_output_classes": predictions["classes"],
+        export_outputs = {'predict_output': tf.estimator.export.PredictOutput({"classes": predictions["classes"],
                                                                                'probabilities': predictions["probabilities"]})}
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions, export_outputs=export_outputs)
 
