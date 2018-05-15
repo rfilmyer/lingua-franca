@@ -247,7 +247,7 @@ def main(unused_argv):
 
     print("Model exported to: {0}".format(export_dir))
 
-    np.savetxt(str(os.path.join(export_dir, b"languages.csv")), language_list)
+    np.savetxt(os.path.join(export_dir, b"languages.csv").decode("utf-8"), language_list)
 
 
 
