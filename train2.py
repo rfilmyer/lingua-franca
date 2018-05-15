@@ -154,6 +154,16 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
                                                               tf.estimator.ModeKeys.EVAL))
 
 
+def serving_input_receiver_fn():
+    """Build the serving inputs."""
+    # The outer dimension (None) allows us to batch up inputs for
+    # efficiency. However, it also means that if we want a prediction
+    # for a single instance, we'll need to wrap it in an outer list.
+    tf.logging.debug("building input receiver")
+    inputs = {"mfccs": tf.placeholder(shape=[None, 300, 13], dtype=tf.float32)}
+    return tf.estimator.export.ServingInputReceiver(inputs, inputs)
+
+
 def main(unused_argv):
 
     # Have we computed MFCCs before?
@@ -231,20 +241,14 @@ def main(unused_argv):
     eval_results = mnist_classifier.evaluate(input_fn=eval_input_fn)
     print("Eval Results: %s" % eval_results)
 
-    def serving_input_receiver_fn():
-        """Build the serving inputs."""
-        # The outer dimension (None) allows us to batch up inputs for
-        # efficiency. However, it also means that if we want a prediction
-        # for a single instance, we'll need to wrap it in an outer list.
-        tf.logging.debug("building input receiver")
-        inputs = {"mfccs": tf.placeholder(shape=[None, 300, 13], dtype=tf.float32)}
-        return tf.estimator.export.ServingInputReceiver(inputs, inputs)
-
     export_dir = mnist_classifier.export_savedmodel(
         export_dir_base=MODEL_DIR,
         serving_input_receiver_fn=serving_input_receiver_fn)
 
     print("Model exported to: {0}".format(export_dir))
+
+    np.savetxt(os.path.join(export_dir, "languages.csv"), language_list)
+
 
 
 if __name__ == "__main__":
