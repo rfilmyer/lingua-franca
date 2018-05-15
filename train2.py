@@ -247,7 +247,7 @@ def main(unused_argv):
 
     print("Model exported to: {0}".format(export_dir))
 
-    with open(os.path.join(export_dir, b"languages.csv")) as language_csv:
+    with open(os.path.join(export_dir, b"languages.csv").decode("utf-8")) as language_csv:
         for language in language_list:
             language_csv.write(language)
             language_csv.write("\n")
