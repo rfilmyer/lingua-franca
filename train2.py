@@ -192,7 +192,7 @@ def regenerate_images() -> tuple:
     tf.logging.info("Creating new images...")
     images = []
     raw_labels = []
-    for filename, language in voxforge.get_files()[:200]:
+    for filename, language in voxforge.get_files():
         image = np.zeros([1, 1])
         try:
             image = voxforge.create_mfcc(filename)
