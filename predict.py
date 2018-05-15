@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from voxforge import create_mfcc, randomCrop
+import lingua_franca_config
 
 # # # MODEL SETTINGS
 MODEL_DIR = os.path.join(tempfile.gettempdir(), "lingua-franca-model")
@@ -16,7 +17,7 @@ parser = argparse.ArgumentParser(description="Tensorflow CNN model for language 
 parser.add_argument("-v", action="store_true", help="Turn on verbose logging")
 parser.add_argument("--modeldir", default=MODEL_DIR, help="Directory in which to find the model info")
 
-def load_language_list(filename = "mfccs.npz"):
+def load_language_list(filename = lingua_franca_config.mfccs_file_name):
     """
     Builds the list of classified languages from the original data
     """
