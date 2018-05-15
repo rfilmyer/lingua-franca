@@ -5,6 +5,8 @@ import numpy as np
 import scipy.io.wavfile as wav
 from python_speech_features.base import mfcc
 
+import lingua_franca_config
+
 from typing import List, Tuple, Union
 FilePath = Union[str, bytes]
 
@@ -32,15 +34,19 @@ def get_files(voxforge_directory: FilePath = "voxforge") -> List[Tuple[FilePath,
 
 
 # # # IMAGE SETTINGS
-IMAGE_WIDTH = 13
-IMAGE_HEIGHT = 300
+IMAGE_WIDTH = lingua_franca_config.num_cepstra
+IMAGE_HEIGHT = lingua_franca_config.num_frames
 
 
-def image_is_big_enough(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT) -> bool:
+def image_is_big_enough(img: np.ndarray,
+                        width: int=lingua_franca_config.num_cepstra,
+                        height: int=lingua_franca_config.num_frames) -> bool:
     return img.shape[0] >= height and img.shape[1] >= width
 
 
-def randomCrop(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT) -> np.ndarray:
+def randomCrop(img: np.ndarray,
+               width: int=lingua_franca_config.num_cepstra,
+               height: int=lingua_franca_config.num_frames) -> np.ndarray:
     assert img.shape[0] >= height
     assert img.shape[1] >= width
     x = random.randint(0, img.shape[1] - width)
@@ -50,7 +56,7 @@ def randomCrop(img: np.ndarray, width: int=IMAGE_WIDTH, height: int=IMAGE_HEIGHT
 
 def create_mfcc(filename: str) -> np.ndarray:
     bitrate, signal = wav.read(filename)
-    mfcc_data = mfcc(signal, bitrate, nfft=1200)
+    mfcc_data = mfcc(signal, bitrate, numcep=lingua_franca_config.num_cepstra, nfft=1200)
     return mfcc_data
 
 if __name__ == "__main__":

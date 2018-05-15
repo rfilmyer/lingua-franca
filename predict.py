@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from voxforge import create_mfcc, randomCrop
+import lingua_franca_config
 
 # # # MODEL SETTINGS
 MODEL_DIR = os.path.join(tempfile.gettempdir(), "lingua-franca-model")
@@ -16,7 +17,7 @@ parser = argparse.ArgumentParser(description="Tensorflow CNN model for language 
 parser.add_argument("-v", action="store_true", help="Turn on verbose logging")
 parser.add_argument("--modeldir", default=MODEL_DIR, help="Directory in which to find the model info")
 
-def load_language_list(filename = "mfccs.npz"):
+def load_language_list(filename = lingua_franca_config.mfccs_file_name):
     """
     Builds the list of classified languages from the original data
     """
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     predictions = ncf_files[["filename", "language"]].copy()
 
     if os.path.exists(os.path.join(MODEL_DIR, "languages.csv")):
-        language_list = np.loadtxt(os.path.join(MODEL_DIR, "languages.csv"))
+        language_list = np.genfromtxt(os.path.join(MODEL_DIR, "languages.csv"), dtype='str')
     else:
         language_list = load_language_list()
 
@@ -64,7 +65,7 @@ if __name__ == "__main__":
     raw_predictions = predict_fn(
         {"mfccs": ncf_mfccs})
 
-    predictions["predicted"] = [language_list[prediction] for prediction in raw_predictions["pred_output_classes"]]
+    predictions["predicted"] = [language_list[prediction] for prediction in raw_predictions["classes"]]
     predictions["pct_confidence"] = np.amax(raw_predictions["probabilities"], axis=1)
     print("PREDICTIONS:")
     print(predictions)
