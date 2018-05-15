@@ -5,6 +5,8 @@ import tempfile
 import tensorflow as tf
 import numpy as np
 
+import pandas as pd
+
 from voxforge import create_mfcc, randomCrop
 
 # # # MODEL SETTINGS
@@ -14,6 +16,7 @@ parser = argparse.ArgumentParser(description="Tensorflow CNN model for language 
 parser.add_argument("-v", action="store_true", help="Turn on verbose logging")
 parser.add_argument("--modeldir", default=MODEL_DIR, help="Directory in which to find the model info")
 
+# To build the language list, we need to load the master file of MFCCs.
 MFCC_FILE_NAME = "mfccs.npz"
 loaded_data = np.load(MFCC_FILE_NAME)
 raw_labels = loaded_data["raw_labels"]
@@ -38,9 +41,17 @@ ncf_labels = np.array([np.where(language_list == language) for language in ncf_l
 # print("NCF Results: %s" % ncf_results)
 
 if __name__ == "__main__":
+
+    predictions = pd.DataFrame(ncf_files, columns=["filename"])
+    predictions["expected"] = ncf_languages
+
     args = parser.parse_args()
     MODEL_DIR = args.modeldir
     predict_fn = tf.contrib.predictor.from_saved_model(MODEL_DIR)
-    predictions = predict_fn(
+    raw_predictions = predict_fn(
         {"mfccs": ncf_data})
+
+    predictions["predicted"] = [language_list[prediction] for prediction in raw_predictions["pred_output_classes"]]
+    predictions["pct_confidence"] = np.amax(raw_predictions["probabilities"], axis=1)
+    print("PREDICTIONS:")
     print(predictions)
