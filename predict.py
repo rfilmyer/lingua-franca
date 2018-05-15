@@ -64,7 +64,7 @@ if __name__ == "__main__":
     raw_predictions = predict_fn(
         {"mfccs": ncf_mfccs})
 
-    predictions["predicted"] = [language_list[prediction] for prediction in raw_predictions["pred_output_classes"]]
+    predictions["predicted"] = [language_list[prediction] for prediction in raw_predictions["classes"]]
     predictions["pct_confidence"] = np.amax(raw_predictions["probabilities"], axis=1)
     print("PREDICTIONS:")
     print(predictions)
