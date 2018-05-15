@@ -56,7 +56,7 @@ if __name__ == "__main__":
     predictions = ncf_files[["filename", "language"]].copy()
 
     if os.path.exists(os.path.join(MODEL_DIR, "languages.csv")):
-        language_list = np.loadtxt(os.path.join(MODEL_DIR, "languages.csv"))
+        language_list = np.genfromtxt(os.path.join(MODEL_DIR, "languages.csv"), dtype='str')
     else:
         language_list = load_language_list()
 
