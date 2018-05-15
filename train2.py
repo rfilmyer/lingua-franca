@@ -66,7 +66,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     )
     tf.logging.debug("Conv 1 Layer Shape: %s", conv1.shape)
 
-    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[3, 3], strides=2)
+    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
     tf.logging.debug("Pool 1 Layer Shape: %s", pool1.shape)
     # #############################################################################
     # ROUND2#######################################################################
@@ -79,7 +79,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         activation=tf.nn.relu
     )
     tf.logging.debug("Conv 2 Shape: %s", conv2.shape)
-    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[3, 3], strides=2)
+    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
     tf.logging.debug("Pool 2 Shape: %s", pool2.shape)
     # #############################################################################
     # ROUND3#####################################################################
@@ -97,7 +97,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     # ###########################################################################
     # ROUND4#####################################################################
     # Convolutional/Pooling layer 4
-    """conv4 = tf.layers.conv2d(
+    conv4 = tf.layers.conv2d(
         inputs=pool3,
         filters=64,
         kernel_size=[5, 5],
@@ -107,12 +107,12 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     tf.logging.debug("Conv 4 Layer Shape: %s", conv4.shape)
 
     
-    pool4 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[4, 4], strides=2)"""
+    pool4 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[2, 2], strides=1)
     ############################################################################
     # Fully Connected Layer
-    pool3_flat = tf.reshape(pool3, [-1, 1 * 73 * 64])  # These dimensions should match those of the final pooling layer
-    tf.logging.debug("Pool 3 Flat Shape: %s", pool3_flat.shape)
-    dense = tf.layers.dense(inputs=pool3_flat, units=1024, activation=tf.nn.relu)
+    pool4_flat = tf.reshape(pool4, [-1, 1 * 73 * 64])  # These dimensions should match those of the final pooling layer
+    tf.logging.debug("Pool 3 Flat Shape: %s", pool4_flat.shape)
+    dense = tf.layers.dense(inputs=pool4_flat, units=1024, activation=tf.nn.relu)
     tf.logging.debug("Dense Shape: %s", dense.shape)
     dropout = tf.layers.dropout(inputs=dense, training=mode == tf.estimator.ModeKeys.TRAIN)
     tf.logging.debug("Dropout Shape: %s", dropout.shape)
