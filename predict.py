@@ -7,7 +7,7 @@ import numpy as np
 
 import pandas as pd
 
-import voxforge
+from voxforge import create_mfcc, randomCrop
 import lingua_franca_config
 
 # # # MODEL SETTINGS
@@ -38,14 +38,8 @@ def load_ncf_files(directory="test-audio"):
     mfcc_list = []
     for filename in ncf_files["filename"]:
         filename = os.path.join(directory, filename)
-        mfcc = voxforge.create_mfcc(filename)
-        if voxforge.image_is_big_enough(mfcc):
-            cropped_mfcc = voxforge.randomCrop(mfcc)
-        else:
-            padded = np.zeros((lingua_franca_config.num_frames, lingua_franca_config.num_cepstra))
-            frames, cepstra = mfcc.shape
-            padded[0:frames, 0:cepstra] = mfcc
-            cropped_mfcc = padded
+        mfcc = create_mfcc(filename)
+        cropped_mfcc = randomCrop(mfcc)
         mfcc_list.append(cropped_mfcc)
 
     mfcc_array = np.array(mfcc_list, np.float32)

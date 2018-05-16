@@ -11,7 +11,6 @@ import numpy as np
 import voxforge
 import os
 import tempfile
-import lingua_franca_config
 
 # Verbosity flag
 import argparse
@@ -53,11 +52,12 @@ NUM_LANGUAGES = 3  # This is a default that should get reset
 # Input Layer
 # we do something custom here
 def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
-    tf.logging.debug("Feature Shape: %s", features["mfccs"].shape)
-    input_layer = tf.reshape(features["mfccs"], [-1,
-                                                 lingua_franca_config.num_frames,
-                                                 lingua_franca_config.num_cepstra,
-                                                 1])
+    if mode == tf.estimator.ModeKeys.TRAIN:
+        training = True
+    else:
+        training = False
+
+    input_layer = tf.reshape(features["mfccs"], [-1, voxforge.IMAGE_HEIGHT, voxforge.IMAGE_WIDTH, 1])
     tf.logging.debug("Input Layer Shape: %s", input_layer.shape)
 
     #ROUND1#####################################################################
@@ -67,11 +67,16 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         filters=32,
         kernel_size=[7, 7],
         padding="same",
-        activation=tf.nn.relu
+        activation=None
     )
     tf.logging.debug("Conv 1 Layer Shape: %s", conv1.shape)
 
-    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+    batch_1 = tf.layers.batch_normalization(conv1, training=training)
+
+    relu_1 = tf.nn.relu(batch_1)
+
+
+    pool1 = tf.layers.max_pooling2d(inputs=relu_1, pool_size=[2, 2], strides=2)
     tf.logging.debug("Pool 1 Layer Shape: %s", pool1.shape)
     # #############################################################################
     # ROUND2#######################################################################
@@ -81,10 +86,15 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         filters=64,
         kernel_size=[5, 5],
         padding="same",
-        activation=tf.nn.relu
+        activation=None
     )
     tf.logging.debug("Conv 2 Shape: %s", conv2.shape)
-    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+
+    batch_2 = tf.layers.batch_normalization(conv2, training=training)
+
+    relu_2 = tf.nn.relu(batch_2)
+
+    pool2 = tf.layers.max_pooling2d(inputs=relu_2, pool_size=[2, 2], strides=2)
     tf.logging.debug("Pool 2 Shape: %s", pool2.shape)
     # #############################################################################
     # ROUND3#####################################################################
@@ -94,11 +104,15 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         filters=64,
         kernel_size=[5, 5],
         padding="same",
-        activation=tf.nn.relu
+        activation=None
     )
     tf.logging.debug("Conv 3 Layer Shape: %s", conv3.shape)
 
-    pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=1)
+    batch_3 = tf.layers.batch_normalization(conv3, training=training)
+
+    relu_3 = tf.nn.relu(batch_3)
+
+    pool3 = tf.layers.max_pooling2d(inputs=relu_3, pool_size=[2, 2], strides=1)
     # ###########################################################################
     # ROUND4#####################################################################
     # Convolutional/Pooling layer 4
@@ -107,34 +121,24 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         filters=64,
         kernel_size=[5, 5],
         padding="same",
-        activation=tf.nn.relu
+        activation=None
     )
     tf.logging.debug("Conv 4 Layer Shape: %s", conv4.shape)
 
-    pool4 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[2, 2], strides=1)
-    tf.logging.debug("Pool 4 Shape: %s", pool4.shape)
+    batch_4 = tf.layers.batch_normalization(conv4, training=training)
+
+    relu_4 = tf.nn.relu(batch_4)
+
+    pool4 = tf.layers.max_pooling2d(inputs=relu_4, pool_size=[2, 2], strides=1)
     ############################################################################
     # Fully Connected Layer
-
-    # framelengths to final size:
-    # 300 :: 73, 250 :: 60, 400 :: 98
-    # 13 :: 1, 24 :: 5, 26 ::5, 18 :: 3, 17:: 3
-
-    # final_frame_length = np.floor_divide(lingua_franca_config.num_frames, 4) - 2
-    # final_frame_length = conv4.shape[]
-    # final_cepstra_height = max(conv4.shape[3] - 1, 1) # screw it, I can't figure it out
-
-    # These dimensions should match those of the final pooling layer
-    # For 13x300 this should be (batch_size, 73, 1, 64)
-    # pool4_flat = tf.reshape(pool4, [-1, final_cepstra_height * final_frame_length * 64])
-
-    # Suggestion: Just match it automatically
-    pool4_flat = tf.reshape(pool4, [-1, np.product(pool4.shape[1:])])
-    tf.logging.debug("Pool 4 Flat Shape: %s", pool4_flat.shape)
+    pool4_flat = tf.reshape(pool4, [-1, 1 * 73 * 64])  # These dimensions should match those of the final pooling layer
+    tf.logging.debug("Pool 3 Flat Shape: %s", pool4_flat.shape)
     dense = tf.layers.dense(inputs=pool4_flat, units=1024, activation=tf.nn.relu)
     tf.logging.debug("Dense Shape: %s", dense.shape)
     dropout = tf.layers.dropout(inputs=dense, training=mode == tf.estimator.ModeKeys.TRAIN)
     tf.logging.debug("Dropout Shape: %s", dropout.shape)
+
 
     # Logits Layer
     logits = tf.layers.dense(inputs=dropout, units=NUM_LANGUAGES)
@@ -179,65 +183,41 @@ def serving_input_receiver_fn():
     # efficiency. However, it also means that if we want a prediction
     # for a single instance, we'll need to wrap it in an outer list.
     tf.logging.debug("building input receiver")
-    inputs = {"mfccs": tf.placeholder(shape=[None, lingua_franca_config.num_frames, lingua_franca_config.num_cepstra],
-                                      dtype=tf.float32)}
+    inputs = {"mfccs": tf.placeholder(shape=[None, 300, 13], dtype=tf.float32)}
     return tf.estimator.export.ServingInputReceiver(inputs, inputs)
-
-def regenerate_images() -> tuple:
-    """
-    Create MFCCs from Voxforge WAV files.
-
-    Returns a tuple (data, raw_labels), with 2 ndarrays
-    """
-    tf.logging.info("Creating new images...")
-    images = []
-    raw_labels = []
-    for filename, language in voxforge.get_files():
-        try:
-            image = voxforge.create_mfcc(filename)
-        except ValueError:
-            tf.logging.warn("An audio file is messed up: %s", filename)
-            break
-        if voxforge.image_is_big_enough(image):
-            cropped = voxforge.randomCrop(image)
-            images.append(cropped)
-        else:
-            padded = np.zeros((lingua_franca_config.num_frames, lingua_franca_config.num_cepstra))
-            frames, cepstra = image.shape
-            padded[0:frames, 0:cepstra] = image
-            images.append(padded)
-
-
-        raw_labels.append(language)
-
-
-    tf.logging.info("Created %d MFCCs from %d images.", len(images), len(voxforge.get_files()))
-    data = np.array(images).astype(np.float32)
-    raw_labels = np.array(raw_labels)
-    np.savez_compressed(MFCC_FILE_NAME, data=data, raw_labels=raw_labels)
-    return data, raw_labels
 
 
 def main(unused_argv):
+
     # Have we computed MFCCs before?
     if os.path.exists(MFCC_FILE_NAME):
         tf.logging.info("Loading saved images...")
         loaded_data = np.load(MFCC_FILE_NAME)
-        if isinstance(loaded_data["data"], np.ndarray) and \
-                len(loaded_data["data"]) > 0 and \
-                loaded_data["data"][0].shape == (lingua_franca_config.num_frames, lingua_franca_config.num_cepstra):
-            data = loaded_data["data"]
-            raw_labels = loaded_data["raw_labels"]
-        else:
-            tf.logging.warn("Precomputed MFCCs are of wrong size, expected %s, got %s. Will have to recompute.",
-                            (lingua_franca_config.num_frames, lingua_franca_config.num_cepstra),
-                            loaded_data["data"].shape)
-            data, raw_labels = regenerate_images()
-
-
+        data = loaded_data["data"]
+        raw_labels = loaded_data["raw_labels"]
     else:
-        data, raw_labels = regenerate_images()
-
+        tf.logging.info("Creating new images...")
+        images = []
+        raw_labels = []
+        for filename, language in voxforge.get_files():
+            image = np.zeros([1, 1])
+            try:
+                image = voxforge.create_mfcc(filename)
+            except ValueError:
+                tf.logging.warn("An audio file is messed up: %s", filename)
+            if voxforge.image_is_big_enough(image):
+                cropped = voxforge.randomCrop(image)
+                images.append(cropped)
+                raw_labels.append(language)
+            else:
+                tf.logging.debug("Small image: size is {image_shape}, "
+                                 "min size is {height}x{width}".format(image_shape=image.shape,
+                                                                       width=voxforge.IMAGE_WIDTH,
+                                                                       height=voxforge.IMAGE_HEIGHT))
+        tf.logging.debug("Done converting images.")
+        data = np.array(images).astype(np.float32)
+        raw_labels = np.array(raw_labels)
+        np.savez_compressed(MFCC_FILE_NAME, data=data, raw_labels=raw_labels)
 
     tf.logging.debug("Data Shape: %s", data.shape)
 
@@ -263,7 +243,7 @@ def main(unused_argv):
     train_input_fn = tf.estimator.inputs.numpy_input_fn(
         x={"mfccs": train_data},
         y=train_labels,
-        batch_size=lingua_franca_config.batch_size,
+        batch_size=100,
         num_epochs=None,
         shuffle=True
     )
@@ -290,10 +270,7 @@ def main(unused_argv):
 
     print("Model exported to: {0}".format(export_dir))
 
-    with open(os.path.join(export_dir, b"languages.csv"), 'w') as language_csv:
-        for language in language_list:
-            language_csv.write(language)
-            language_csv.write("\n")
+    np.savetxt(os.path.join(export_dir, b"languages.csv"), language_list)
 
 
 
@@ -306,3 +283,4 @@ if __name__ == "__main__":
 
     # run_options = tf.RunOptions(report_tensor_allocations_upon_oom=True)
     tf.app.run()
+
