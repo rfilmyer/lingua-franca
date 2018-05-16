@@ -192,7 +192,7 @@ def regenerate_images() -> tuple:
     tf.logging.info("Creating new images...")
     images = []
     raw_labels = []
-    for filename, language in voxforge.get_files():
+    for filename, language in voxforge.get_files()[:200]:
         image = np.zeros([1, 1])
         try:
             image = voxforge.create_mfcc(filename)
@@ -200,13 +200,14 @@ def regenerate_images() -> tuple:
             tf.logging.warn("An audio file is messed up: %s", filename)
         if voxforge.image_is_big_enough(image):
             cropped = voxforge.randomCrop(image)
-            images.append(cropped)
-            raw_labels.append(language)
         else:
-            tf.logging.debug("Small image: size is {image_shape}, "
-                             "min size is {height}x{width}".format(image_shape=image.shape,
-                                                                   width=lingua_franca_config.num_cepstra,
-                                                                   height=lingua_franca_config.num_frames))
+            padded = np.zeros((lingua_franca_config.num_frames, lingua_franca_config.num_cepstra))
+            frames, cepstra = image.shape
+            padded[0:frames, 0:cepstra] = image
+
+        images.append(cropped)
+        raw_labels.append(language)
+
 
     tf.logging.info("Created %d MFCCs from %d images.", len(images), len(voxforge.get_files()))
     data = np.array(images).astype(np.float32)
