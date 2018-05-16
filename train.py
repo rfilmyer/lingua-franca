@@ -200,12 +200,14 @@ def regenerate_images() -> tuple:
             tf.logging.warn("An audio file is messed up: %s", filename)
         if voxforge.image_is_big_enough(image):
             cropped = voxforge.randomCrop(image)
+            images.append(cropped)
         else:
             padded = np.zeros((lingua_franca_config.num_frames, lingua_franca_config.num_cepstra))
             frames, cepstra = image.shape
             padded[0:frames, 0:cepstra] = image
+            images.append(padded)
 
-        images.append(cropped)
+
         raw_labels.append(language)
 
 
