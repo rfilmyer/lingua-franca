@@ -81,6 +81,9 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
 
     relu_1 = tf.nn.relu(batch_1)
 
+    tf.summary.histogram('weights_layer_1', conv1)
+    tf.summary.histogram('bias_layer_1', batch_1)
+    tf.summary.histogram('activations_layer_1', relu_1)
 
     pool1 = tf.layers.max_pooling2d(inputs=relu_1, pool_size=[2, 2], strides=2)
     tf.logging.debug("Pool 1 Layer Shape: %s", pool1.shape)
@@ -100,6 +103,10 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
 
     relu_2 = tf.nn.relu(batch_2)
 
+    tf.summary.histogram('weights_layer_2', conv2)
+    tf.summary.histogram('bias_layer_2', batch_2)
+    tf.summary.histogram('activations_layer_2', relu_2)
+
     pool2 = tf.layers.max_pooling2d(inputs=relu_2, pool_size=[2, 2], strides=2)
     tf.logging.debug("Pool 2 Shape: %s", pool2.shape)
     # #############################################################################
@@ -118,6 +125,10 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
 
     relu_3 = tf.nn.relu(batch_3)
 
+    tf.summary.histogram('weights_layer_3', conv3)
+    tf.summary.histogram('bias_layer_3', batch_3)
+    tf.summary.histogram('activations_layer_3', relu_3)
+
     pool3 = tf.layers.max_pooling2d(inputs=relu_3, pool_size=[2, 2], strides=1)
     # ###########################################################################
     # ROUND4#####################################################################
@@ -134,6 +145,10 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     batch_4 = tf.layers.batch_normalization(conv4, training=training)
 
     relu_4 = tf.nn.relu(batch_4)
+
+    tf.summary.histogram('weights_layer_4', conv4)
+    tf.summary.histogram('bias_layer_4', batch_4)
+    tf.summary.histogram('activations_layer_4', relu_4)
 
     pool4 = tf.layers.max_pooling2d(inputs=relu_4, pool_size=[2, 2], strides=1)
 
