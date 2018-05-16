@@ -15,6 +15,8 @@ import tempfile
 # Verbosity flag
 import argparse
 
+import lingua_franca_config
+
 # # # MODEL SETTINGS
 MODEL_DIR = os.path.join(tempfile.gettempdir(), "lingua-franca-model")
 
@@ -57,7 +59,11 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     else:
         training = False
 
-    input_layer = tf.reshape(features["mfccs"], [-1, voxforge.IMAGE_HEIGHT, voxforge.IMAGE_WIDTH, 1])
+    tf.logging.debug("Feature Shape: %s", features["mfccs"].shape)
+    input_layer = tf.reshape(features["mfccs"], [-1,
+                                                 lingua_franca_config.num_frames,
+                                                 lingua_franca_config.num_cepstra,
+                                                 1])
     tf.logging.debug("Input Layer Shape: %s", input_layer.shape)
 
     #ROUND1#####################################################################
@@ -130,10 +136,11 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
     relu_4 = tf.nn.relu(batch_4)
 
     pool4 = tf.layers.max_pooling2d(inputs=relu_4, pool_size=[2, 2], strides=1)
+
     ############################################################################
     # Fully Connected Layer
-    pool4_flat = tf.reshape(pool4, [-1, 1 * 73 * 64])  # These dimensions should match those of the final pooling layer
-    tf.logging.debug("Pool 3 Flat Shape: %s", pool4_flat.shape)
+    pool4_flat = tf.reshape(pool4, [-1, np.product(pool4.shape[1:])])
+    tf.logging.debug("Pool 4 Flat Shape: %s", pool4_flat.shape)
     dense = tf.layers.dense(inputs=pool4_flat, units=1024, activation=tf.nn.relu)
     tf.logging.debug("Dense Shape: %s", dense.shape)
     dropout = tf.layers.dropout(inputs=dense, training=mode == tf.estimator.ModeKeys.TRAIN)
@@ -183,8 +190,43 @@ def serving_input_receiver_fn():
     # efficiency. However, it also means that if we want a prediction
     # for a single instance, we'll need to wrap it in an outer list.
     tf.logging.debug("building input receiver")
-    inputs = {"mfccs": tf.placeholder(shape=[None, 300, 13], dtype=tf.float32)}
+    inputs = {"mfccs": tf.placeholder(shape=[None, lingua_franca_config.num_frames, lingua_franca_config.num_cepstra],
+                                      dtype=tf.float32)}
     return tf.estimator.export.ServingInputReceiver(inputs, inputs)
+
+def regenerate_images() -> tuple:
+    """
+    Create MFCCs from Voxforge WAV files.
+
+    Returns a tuple (data, raw_labels), with 2 ndarrays
+    """
+    tf.logging.info("Creating new images...")
+    images = []
+    raw_labels = []
+    for filename, language in voxforge.get_files():
+        try:
+            image = voxforge.create_mfcc(filename)
+        except ValueError:
+            tf.logging.warn("An audio file is messed up: %s", filename)
+            break
+        if voxforge.image_is_big_enough(image):
+            cropped = voxforge.randomCrop(image)
+            images.append(cropped)
+        else:
+            padded = np.zeros((lingua_franca_config.num_frames, lingua_franca_config.num_cepstra))
+            frames, cepstra = image.shape
+            padded[0:frames, 0:cepstra] = image
+            images.append(padded)
+
+
+        raw_labels.append(language)
+
+
+    tf.logging.info("Created %d MFCCs from %d images.", len(images), len(voxforge.get_files()))
+    data = np.array(images).astype(np.float32)
+    raw_labels = np.array(raw_labels)
+    np.savez_compressed(MFCC_FILE_NAME, data=data, raw_labels=raw_labels)
+    return data, raw_labels
 
 
 def main(unused_argv):
@@ -193,31 +235,18 @@ def main(unused_argv):
     if os.path.exists(MFCC_FILE_NAME):
         tf.logging.info("Loading saved images...")
         loaded_data = np.load(MFCC_FILE_NAME)
-        data = loaded_data["data"]
-        raw_labels = loaded_data["raw_labels"]
+        if isinstance(loaded_data["data"], np.ndarray) and \
+                len(loaded_data["data"]) > 0 and \
+                loaded_data["data"][0].shape == (lingua_franca_config.num_frames, lingua_franca_config.num_cepstra):
+            data = loaded_data["data"]
+            raw_labels = loaded_data["raw_labels"]
+        else:
+            tf.logging.warn("Precomputed MFCCs are of wrong size, expected %s, got %s. Will have to recompute.",
+                            (lingua_franca_config.num_frames, lingua_franca_config.num_cepstra),
+                            loaded_data["data"].shape)
+            data, raw_labels = regenerate_images()
     else:
-        tf.logging.info("Creating new images...")
-        images = []
-        raw_labels = []
-        for filename, language in voxforge.get_files():
-            image = np.zeros([1, 1])
-            try:
-                image = voxforge.create_mfcc(filename)
-            except ValueError:
-                tf.logging.warn("An audio file is messed up: %s", filename)
-            if voxforge.image_is_big_enough(image):
-                cropped = voxforge.randomCrop(image)
-                images.append(cropped)
-                raw_labels.append(language)
-            else:
-                tf.logging.debug("Small image: size is {image_shape}, "
-                                 "min size is {height}x{width}".format(image_shape=image.shape,
-                                                                       width=voxforge.IMAGE_WIDTH,
-                                                                       height=voxforge.IMAGE_HEIGHT))
-        tf.logging.debug("Done converting images.")
-        data = np.array(images).astype(np.float32)
-        raw_labels = np.array(raw_labels)
-        np.savez_compressed(MFCC_FILE_NAME, data=data, raw_labels=raw_labels)
+        data, raw_labels = regenerate_images()
 
     tf.logging.debug("Data Shape: %s", data.shape)
 
@@ -243,7 +272,7 @@ def main(unused_argv):
     train_input_fn = tf.estimator.inputs.numpy_input_fn(
         x={"mfccs": train_data},
         y=train_labels,
-        batch_size=100,
+        batch_size=lingua_franca_config.batch_size,
         num_epochs=None,
         shuffle=True
     )
@@ -270,7 +299,10 @@ def main(unused_argv):
 
     print("Model exported to: {0}".format(export_dir))
 
-    np.savetxt(os.path.join(export_dir, b"languages.csv"), language_list)
+    with open(os.path.join(export_dir, b"languages.csv"), 'w') as language_csv:
+        for language in language_list:
+            language_csv.write(language)
+            language_csv.write("\n")
 
 
 
