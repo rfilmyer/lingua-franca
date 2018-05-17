@@ -67,11 +67,15 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         filters=32,
         kernel_size=[7, 7],
         padding="same",
-        activation=tf.nn.relu
+        activation=None
     )
     tf.logging.debug("Conv 1 Layer Shape: %s", conv1.shape)
+    tf.summary.histogram('weights_1', conv1)
 
-    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+    rel1 = tf.nn.relu(conv1)
+    tf.summary.histogram('activations_1', rel1)
+
+    pool1 = tf.layers.max_pooling2d(inputs=rel1, pool_size=[2, 2], strides=2)
     tf.logging.debug("Pool 1 Layer Shape: %s", pool1.shape)
     # #############################################################################
     # ROUND2#######################################################################
@@ -81,10 +85,15 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         filters=64,
         kernel_size=[5, 5],
         padding="same",
-        activation=tf.nn.relu
+        activation=None
     )
     tf.logging.debug("Conv 2 Shape: %s", conv2.shape)
-    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+    tf.summary.histogram('weights_2', conv2)
+
+    rel2 = tf.nn.relu(conv2)
+    tf.summary.histogram('activations_2', rel1)
+
+    pool2 = tf.layers.max_pooling2d(inputs=rel2, pool_size=[2, 2], strides=2)
     tf.logging.debug("Pool 2 Shape: %s", pool2.shape)
     # #############################################################################
     # ROUND3#####################################################################
@@ -94,11 +103,15 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         filters=64,
         kernel_size=[5, 5],
         padding="same",
-        activation=tf.nn.relu
+        activation=None
     )
     tf.logging.debug("Conv 3 Layer Shape: %s", conv3.shape)
+    tf.summary.histogram('weights_3', conv3)
 
-    pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=1)
+    rel3 = tf.nn.relu(conv3)
+    tf.summary.histogram('activations_3', rel3)
+
+    pool3 = tf.layers.max_pooling2d(inputs=rel3, pool_size=[2, 2], strides=1)
     # ###########################################################################
     # ROUND4#####################################################################
     # Convolutional/Pooling layer 4
@@ -107,11 +120,15 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         filters=64,
         kernel_size=[5, 5],
         padding="same",
-        activation=tf.nn.relu
+        activation=None
     )
     tf.logging.debug("Conv 4 Layer Shape: %s", conv4.shape)
+    tf.summary.histogram('weights_4', conv4)
 
-    pool4 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[2, 2], strides=1)
+    rel4 = tf.nn.relu(conv4)
+    tf.summary.histogram('activations_4', rel4)
+
+    pool4 = tf.layers.max_pooling2d(inputs=rel4, pool_size=[2, 2], strides=1)
     tf.logging.debug("Pool 4 Shape: %s", pool4.shape)
     ############################################################################
     # Fully Connected Layer
