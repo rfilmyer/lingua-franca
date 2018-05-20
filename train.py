@@ -58,21 +58,26 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
                                                  lingua_franca_config.num_frames,
                                                  lingua_franca_config.num_cepstra,
                                                  1])
-    tf.logging.debug("Input Layer Shape: %s", input_layer.shape)
+    noise = tf.random_normal(input_layer.shape, 0, stddev=10)
+    tf.logging.debug("Noise: %s", noise)
+
+    noisy = input_layer + noise
+
+    #tf.logging.debug("Input Layer Shape: %s", input_layer.shape)
 
     #ROUND1#####################################################################
     # Convolutional/Pooling layer 1
     conv1 = tf.layers.conv2d(
-        inputs=input_layer,
+        inputs=noisy,
         filters=32,
         kernel_size=[7, 7],
         padding="same",
         activation=tf.nn.relu
     )
-    tf.logging.debug("Conv 1 Layer Shape: %s", conv1.shape)
+    #tf.logging.debug("Conv 1 Layer Shape: %s", conv1.shape)
 
     pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
-    tf.logging.debug("Pool 1 Layer Shape: %s", pool1.shape)
+    #tf.logging.debug("Pool 1 Layer Shape: %s", pool1.shape)
     # #############################################################################
     # ROUND2#######################################################################
     # Convolutional and Pooling Layer 2
@@ -83,9 +88,9 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         padding="same",
         activation=tf.nn.relu
     )
-    tf.logging.debug("Conv 2 Shape: %s", conv2.shape)
+    #tf.logging.debug("Conv 2 Shape: %s", conv2.shape)
     pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
-    tf.logging.debug("Pool 2 Shape: %s", pool2.shape)
+    #tf.logging.debug("Pool 2 Shape: %s", pool2.shape)
     # #############################################################################
     # ROUND3#####################################################################
     # Convolutional/Pooling layer 3
@@ -96,7 +101,7 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         padding="same",
         activation=tf.nn.relu
     )
-    tf.logging.debug("Conv 3 Layer Shape: %s", conv3.shape)
+    #tf.logging.debug("Conv 3 Layer Shape: %s", conv3.shape)
 
     pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2, 2], strides=1)
     # ###########################################################################
@@ -109,10 +114,10 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         padding="same",
         activation=tf.nn.relu
     )
-    tf.logging.debug("Conv 4 Layer Shape: %s", conv4.shape)
+    #tf.logging.debug("Conv 4 Layer Shape: %s", conv4.shape)
 
     pool4 = tf.layers.max_pooling2d(inputs=conv4, pool_size=[2, 2], strides=1)
-    tf.logging.debug("Pool 4 Shape: %s", pool4.shape)
+    #tf.logging.debug("Pool 4 Shape: %s", pool4.shape)
     ############################################################################
     # Fully Connected Layer
 
@@ -130,11 +135,11 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
 
     # Suggestion: Just match it automatically
     pool4_flat = tf.reshape(pool4, [-1, np.product(pool4.shape[1:])])
-    tf.logging.debug("Pool 4 Flat Shape: %s", pool4_flat.shape)
+    #tf.logging.debug("Pool 4 Flat Shape: %s", pool4_flat.shape)
     dense = tf.layers.dense(inputs=pool4_flat, units=1024, activation=tf.nn.relu)
-    tf.logging.debug("Dense Shape: %s", dense.shape)
+    #tf.logging.debug("Dense Shape: %s", dense.shape)
     dropout = tf.layers.dropout(inputs=dense, training=mode == tf.estimator.ModeKeys.TRAIN)
-    tf.logging.debug("Dropout Shape: %s", dropout.shape)
+    #tf.logging.debug("Dropout Shape: %s", dropout.shape)
 
     # Logits Layer
     logits = tf.layers.dense(inputs=dropout, units=NUM_LANGUAGES)
@@ -152,9 +157,9 @@ def cnn_model_fn(features, labels, mode) -> tf.estimator.EstimatorSpec:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions, export_outputs=export_outputs)
 
     # Loss Function
-    tf.logging.debug("Labels Shape: %s, Logits Shape: %s", labels.shape, logits.shape)
+    #tf.logging.debug("Labels Shape: %s, Logits Shape: %s", labels.shape, logits.shape)
     loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-    tf.logging.debug("Loss Shape: %s", loss.shape)
+    #tf.logging.debug("Loss Shape: %s", loss.shape)
 
     accuracy = tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])
     tf.summary.scalar("accuracy", accuracy[1])
